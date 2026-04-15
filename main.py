@@ -1,1 +1,1 @@
-
+np.random.seed(0)
