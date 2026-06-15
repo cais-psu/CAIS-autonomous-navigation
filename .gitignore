@@ -1,0 +1,21 @@
+# Python virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# Testing
+.pytest_cache/
+
+# ROS artifacts
+*.bag
+*.db3
+
+# Logs / results
+results/
+logs/
