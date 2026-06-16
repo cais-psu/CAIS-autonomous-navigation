@@ -56,3 +56,14 @@ class OccupancyGrid:
             )
 
         return self.grid[y, x] == 0
+    
+    def add_rectangle(
+            self,
+            x_min: int,
+            y_min: int,
+            x_max: int,
+            y_max: int
+    ):
+        for x in range (x_min, x_max + 1):
+            for y in range(y_min, y_max + 1):
+                self.set_obstacle(x,y)
