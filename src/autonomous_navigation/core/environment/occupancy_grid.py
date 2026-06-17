@@ -1,4 +1,5 @@
 import numpy as np
+from autonomous_navigation.core.environment.obstacles import RectangleObstacle
 
 class OccupancyGrid:
     def __init__(self, width: int, height: int):
@@ -57,13 +58,16 @@ class OccupancyGrid:
 
         return self.grid[y, x] == 0
     
-    def add_rectangle(
+    def add_rectangle_obstacle(
             self,
-            x_min: int,
-            y_min: int,
-            x_max: int,
-            y_max: int
+            obstacle: RectangleObstacle
     ):
-        for x in range (x_min, x_max + 1):
-            for y in range(y_min, y_max + 1):
+        for x in range (
+            obstacle.x_min, 
+            obstacle.x_max + 1
+            ):
+            for y in range(
+                obstacle.y_min, 
+                obstacle.y_max + 1
+                ):
                 self.set_obstacle(x,y)
