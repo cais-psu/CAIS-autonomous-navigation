@@ -58,3 +58,25 @@ class RRTPlanner:
                 nearest_index = i
 
         return nearest_index
+    
+    def steer(
+            self,
+            nearest,
+            sample
+    ):
+        dx = sample.x - nearest.x
+        dy = sample.y - nearest.y
+
+        distance = math.sqrt((dx**2) + (dy**2))
+
+        if distance == 0:
+            return nearest  # or copy
+
+        ux = dx / distance 
+        uy = dy / distance
+
+        new_x = nearest.x + self.step_size * ux
+        new_y = nearest.y + self.step_size * uy
+
+        return RRTNode(new_x, new_y)
+    
