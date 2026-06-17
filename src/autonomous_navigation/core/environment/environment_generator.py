@@ -1,6 +1,8 @@
 import random
 
 from autonomous_navigation.core.environment.obstacles import RectangleObstacle
+from autonomous_navigation.core.environment.obstacles import CircleObstacle
+
 
 
 class EnvironmentGenerator:
@@ -24,4 +26,33 @@ class EnvironmentGenerator:
             y,
             x + w,
             y + h
+        )
+    
+    def random_circle(
+        self,
+        width: int,
+        height: int,
+        min_radius: int = 1,
+        max_radius: int = 10
+    ):
+
+        radius = random.randint(
+            min_radius,
+            max_radius
+        )
+
+        center_x = random.randint(
+            radius,
+            width - radius - 1
+        )
+
+        center_y = random.randint(
+            radius,
+            height - radius - 1
+        )
+
+        return CircleObstacle(
+            center_x=center_x,
+            center_y=center_y,
+            radius=radius
         )

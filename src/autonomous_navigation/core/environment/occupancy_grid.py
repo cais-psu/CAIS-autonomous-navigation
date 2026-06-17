@@ -1,5 +1,7 @@
 import numpy as np
 from autonomous_navigation.core.environment.obstacles import RectangleObstacle
+from autonomous_navigation.core.environment.obstacles import CircleObstacle
+
 
 class OccupancyGrid:
     def __init__(self, width: int, height: int):
@@ -71,3 +73,16 @@ class OccupancyGrid:
                 obstacle.y_max + 1
                 ):
                 self.set_obstacle(x,y)
+
+    def add_circle_obstacle(
+            self,
+            obstacle: CircleObstacle
+    ):
+        for x in range(self.width):
+            for y in range(self.height):
+
+                dx = x - obstacle.center_x
+                dy = y - obstacle.center_y
+
+                if dx**2 + dy**2 <= obstacle.radius**2:
+                    self.set_obstacle(x,y)
