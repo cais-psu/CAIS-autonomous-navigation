@@ -86,3 +86,26 @@ class OccupancyGrid:
 
                 if dx**2 + dy**2 <= obstacle.radius**2:
                     self.set_obstacle(x,y)
+
+    def line_is_free(
+            self,
+            x0: int,
+            y0: int,
+            x1: int,
+            y1: int
+    ):
+        n_points = max(
+            abs(x1 - x0),
+            abs(y1 - y0)
+        )
+
+        for t in np.linspace(0, 1, n_points + 1):
+
+            x = round(x0 + t * (x1 - x0))
+            y = round(y0 + t * (y1 - y0))
+
+            if self.is_occupied(x, y):
+                return False
+
+        return True
+        
