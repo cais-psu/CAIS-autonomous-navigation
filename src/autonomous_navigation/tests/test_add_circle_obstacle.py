@@ -16,3 +16,7 @@ def test_add_circle_obstacle():
     assert grid.is_occupied(25, 25)
     assert grid.is_occupied(30, 25)
     assert grid.is_free(0, 0)
+
+    """
+    yo mama
+    """
