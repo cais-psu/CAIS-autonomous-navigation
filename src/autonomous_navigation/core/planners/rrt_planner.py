@@ -29,19 +29,22 @@ class RRTPlanner:
         )
     
     def sample_free(self):
+        while True:
+            x = random.uniform(
+                0,
+                self.grid.width - 1
+            )
 
-        x = random.uniform(
-            0,
-            self.grid.width
-        )
-
-        y = random.uniform(
-            0,
-            self.grid.height
-        )
-
-        return RRTNode(x, y)
-        
+            y = random.uniform(
+                0,
+                self.grid.height - 1 
+            )
+            if self.grid.is_free(
+                int(x),
+                int(y)
+            ):
+                return RRTNode(x, y)
+            
     def nearest_node(
             self,
             sample: RRTNode,
@@ -81,7 +84,17 @@ class RRTPlanner:
 
         new_x = nearest.x + self.step_size * ux
         new_y = nearest.y + self.step_size * uy
+        """
+        new_x = max(
+            0,
+            min(new_x, self.grid.width - 1)
+        )
 
+        new_y = max(
+            0,
+            min(new_y, self.grid.height - 1)
+        )
+        """
         return RRTNode(new_x, new_y)
     
     def reconstruct_path(self, goal_index):
@@ -106,6 +119,24 @@ class RRTPlanner:
             nearest = self.nodes[nearest_idx]
 
             new_node = self.steer(nearest, sample)
+            """
+            if (
+                new_node.x < 0
+                or new_node.x >= self.grid.width
+                or
+                new_node.y < 0
+                or new_node.y >= self.grid.height
+            ):
+                print(
+                    f"OUT OF BOUNDS NODE: "
+                    f"({new_node.x:.2f}, {new_node.y:.2f})"
+                )
+            """
+            if not self.grid.in_bounds(
+                int(new_node.x),
+                int(new_node.y)
+            ):
+                continue
 
             if self.grid.line_is_free(
                 int(nearest.x), int(nearest.y),
