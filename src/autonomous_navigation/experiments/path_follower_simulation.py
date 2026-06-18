@@ -38,7 +38,7 @@ goal_node = RRTNode(90, 90)
 
 planner = RRTPlanner(grid, step_size=4)
 
-path = planner.plan(start_node, goal_node)
+path, stats = planner.plan(start_node, goal_node)
 
 if path is None:
     print("No path found")
@@ -131,3 +131,5 @@ plt.legend()
 plt.axis("equal")
 
 plt.show()
+
+print(stats)

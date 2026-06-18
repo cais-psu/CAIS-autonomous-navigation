@@ -107,11 +107,23 @@ class RRTPlanner:
             idx = node.parent
         return path[::-1]
     
+    def compute_path_length(self, path):
+        total = 0.0
+
+        for i in range(len(path) - 1):
+
+            dx = path[i + 1][0] - path[i][0]
+            dy = path[i + 1][1] - path[i][1]
+
+            total += math.sqrt(dx**2 + dy**2)
+
+        return total
+    
     def plan(self, start: RRTNode, goal: RRTNode, max_iters: int = 1000):
 
         self.nodes = [start]
 
-        for _ in range(max_iters):
+        for iteration in range(max_iters):
 
             sample = self.sample_free()
 
@@ -159,6 +171,28 @@ class RRTPlanner:
                 ):
                     goal.parent = len(self.nodes) - 1
                     self.nodes.append(goal)
-                    return self.reconstruct_path(len(self.nodes) - 1)
-                
-        return None
+
+                    path = self.reconstruct_path(len(self.nodes) - 1)
+
+                    straight_line = self.distance(start, goal)
+
+                    stats = {
+                        "success": True,
+                        "iterations": iteration + 1,
+                        "nodes": len(self.nodes),
+                        "path_length": self.compute_path_length(path),
+                        "path_efficiency": straight_line/self.compute_path_length(path)
+                    }
+
+                    return path, stats
+
+        stats = {
+            "success": False,
+            "iterations": max_iters,
+            "nodes": len(self.nodes),
+            "path_length": None
+
+        }
+
+        return None, stats
+    
