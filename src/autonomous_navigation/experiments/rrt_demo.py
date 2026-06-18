@@ -1,6 +1,7 @@
 """
 Generate 10 random rectangles and 10 random circles.
 """
+
 from matplotlib import pyplot as plt
 from autonomous_navigation.core.environment.occupancy_grid import OccupancyGrid
 from autonomous_navigation.core.environment.obstacles import CircleObstacle, RectangleObstacle
@@ -38,7 +39,7 @@ planner = RRTPlanner(grid, 5)
 start = RRTNode(0, 0)
 goal = RRTNode(90, 90)
 
-path = planner.plan(start, goal)
+path, stats = planner.plan(start, goal)
 
 if path is None:
     print("No path found")
@@ -46,8 +47,6 @@ else:
     print(f"Path found with {len(path)} waypoints")
 
 # Display occupancy grid
-path = planner.plan(start, goal)
-
 plt.imshow(
     grid.grid,
     origin="lower",

@@ -1,3 +1,9 @@
+import numpy as np
+import random
+
+random.seed(42)
+np.random.seed(42)
+
 from autonomous_navigation.core.controllers.path_follower import PathFollower
 from autonomous_navigation.core.robots.omni_robot import OmniRobot
 from autonomous_navigation.core.planners.rrt_planner import RRTPlanner, RRTNode
