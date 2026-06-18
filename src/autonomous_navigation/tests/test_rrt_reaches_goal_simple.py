@@ -11,7 +11,7 @@ def test_rrt_reaches_goal_simple():
     start = RRTNode(0, 0)
     goal = RRTNode(45, 45)
 
-    path = planner.plan(start, goal, max_iters=500)
+    path, stats = planner.plan(start, goal, max_iters=500)
 
     assert path is not None
     assert len(path) > 1
