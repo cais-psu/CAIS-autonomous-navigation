@@ -1,6 +1,8 @@
 """
 Generate 10 random rectangles and 10 random circles.
 """
+import matplotlib
+matplotlib.use("TkAgg")
 
 from matplotlib import pyplot as plt
 from autonomous_navigation.core.environment.occupancy_grid import OccupancyGrid

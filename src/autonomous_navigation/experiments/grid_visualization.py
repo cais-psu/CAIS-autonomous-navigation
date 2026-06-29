@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use("TkAgg")
+
 import matplotlib.pyplot as plt
 
 from autonomous_navigation.core.environment.occupancy_grid import OccupancyGrid
