@@ -13,4 +13,6 @@ controller = OmniMPC(
 x = np.array([0.0, 0.0])
 u = np.array([1.0, 0.5])
 
-print(controller.predict(x, u))
+x_next = controller.predict(x, u)
+
+assert np.allclose(x_next, [0.1, 0.05])
