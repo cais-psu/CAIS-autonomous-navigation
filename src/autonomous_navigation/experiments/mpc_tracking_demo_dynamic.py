@@ -5,6 +5,7 @@ matplotlib.use("TkAgg")
 
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 
 from autonomous_navigation.core.environment.occupancy_grid import OccupancyGrid
 from autonomous_navigation.core.environment.obstacles import CircleObstacle, RectangleObstacle
@@ -129,6 +130,9 @@ ax.imshow(
     cmap="gray_r"
 )
 
+for obstacle in grid.obstacles:
+    obstacle.plot(ax)
+
 # Draw RRT tree
 for node in planner.nodes:
 
@@ -182,13 +186,17 @@ ax.plot(
 )
 
 
+
 # Robot marker
-robot, = ax.plot(
-    [],
-    [],
-    marker="o",
-    markersize=12
+robot_radius = 2.0  # grid units
+
+robot = Circle(
+    (trajectory[0,0], trajectory[0,1]),
+    robot_radius,
+    fill=False
 )
+
+ax.add_patch(robot)
 
 
 ax.set_xlabel("X")
@@ -201,9 +209,9 @@ ax.legend()
 
 def update(frame):
 
-    robot.set_data(
-        [trajectory[frame,0]],
-        [trajectory[frame,1]]
+    robot.center = (
+        trajectory[frame,0],
+        trajectory[frame,1]
     )
 
     return robot,

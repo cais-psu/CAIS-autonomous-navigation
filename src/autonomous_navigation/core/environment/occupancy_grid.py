@@ -18,6 +18,9 @@ class OccupancyGrid:
             (height, width),
             dtype = np.uint8
         )
+
+        self.obstacles = []
+
     def in_bounds(self, x: int, y: int) -> bool:
         return (
             0 <= x < self.width
@@ -64,6 +67,8 @@ class OccupancyGrid:
             self,
             obstacle: RectangleObstacle
     ):
+        self.obstacles.append(obstacle)
+
         for x in range (
             obstacle.x_min, 
             obstacle.x_max + 1
@@ -78,6 +83,8 @@ class OccupancyGrid:
             self,
             obstacle: CircleObstacle
     ):
+        self.obstacles.append(obstacle)
+
         for x in range(self.width):
             for y in range(self.height):
 
