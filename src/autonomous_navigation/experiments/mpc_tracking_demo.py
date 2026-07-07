@@ -10,6 +10,7 @@ from autonomous_navigation.core.environment.environment_generator import Environ
 from autonomous_navigation.core.planners.rrt_node import RRTNode
 from autonomous_navigation.core.planners.rrt_planner import RRTPlanner
 from autonomous_navigation.core.controllers.mpc.omnidirectional import OmniMPC
+from autonomous_navigation.core.planners.path_utils import interpolate_path
 
 grid = OccupancyGrid(
     width=100,
@@ -37,11 +38,14 @@ for _ in range(0,10):
     )
     grid.add_rectangle_obstacle(rectangle)
 
-planner = RRTPlanner(grid, 0.5)
+planner = RRTPlanner(grid, 2)
 start = RRTNode(0, 0)
 goal = RRTNode(90, 90)
 
 path, stats = planner.plan(start, goal, 5000)
+
+path = interpolate_path(path, spacing=0.5)
+
 
 if path is None:
     print("No path found")
@@ -111,7 +115,11 @@ if steps == max_steps:
 trajectory = np.array(trajectory)
 
 # Display occupancy grid
-plt.imshow(
+fig, ax = plt.subplots()
+
+fig.canvas.manager.window.wm_geometry("+300+100")
+
+ax.imshow(
     grid.grid,
     origin="lower",
     cmap="gray_r"
