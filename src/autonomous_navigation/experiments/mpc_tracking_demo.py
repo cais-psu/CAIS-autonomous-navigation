@@ -76,14 +76,16 @@ while i < len(path) - 1:
 
     direction = direction / (dist + 1e-6)
 
-    u = direction
+    # u = mpc.solve(current_state, reference_horizon)
+    mpc.set_reference([target])
+    u = mpc.solve(x)
+    
     x = mpc.predict(x, u)
-
+    print(x)
     trajectory.append(x.copy())
 
 
 trajectory = np.array(trajectory)
-print(trajectory)
 
 # Display occupancy grid
 plt.imshow(
