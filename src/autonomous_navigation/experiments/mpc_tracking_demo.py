@@ -37,7 +37,7 @@ for _ in range(0,10):
     )
     grid.add_rectangle_obstacle(rectangle)
 
-planner = RRTPlanner(grid, 5)
+planner = RRTPlanner(grid, 0.5)
 start = RRTNode(0, 0)
 goal = RRTNode(90, 90)
 
@@ -52,38 +52,61 @@ else:
 
 mpc = OmniMPC(
     dt = 0.1,
-    horizon = 10,
-    Q = np.eye(2),
-    R = np.eye(2),
+    horizon = 20,
+    Q = 100 * np.eye(2),
+    R = 0.1 * np.eye(2),
     v_max = 1.0
 )
 
 x = np.array([start.x, start.y])
 trajectory = [x.copy()]
 
+max_steps = 5000
+steps = 0
 i = 0
 
-while i < len(path) - 1:
+while i < len(path) - 1 and steps < max_steps:
 
-    target = np.array(path[i + 1])
+    target = np.asarray(path[i + 1])
 
-    direction = target - x
-    dist = np.linalg.norm(direction)
+    distances = [
+        np.linalg.norm(x - np.asarray(p))
+        for p in path
+    ]
 
-    if dist < 0.5:   # waypoint tolerance
-        i += 1
-        continue
+    closest = np.argmin(distances)
 
-    direction = direction / (dist + 1e-6)
+    reference = []
+
+    for j in range(mpc.N):
+        idx = min(closest + j, len(path)-1)
+        reference.append(np.asarray(path[idx]))
 
     # u = mpc.solve(current_state, reference_horizon)
-    mpc.set_reference([target])
+    print(np.array(reference))
+    
+    mpc.set_reference(reference)
     u = mpc.solve(x)
     
     x = mpc.predict(x, u)
-    print(x)
+    print(f"State:  {x}, Control: {u}")
     trajectory.append(x.copy())
 
+    if np.linalg.norm(target - x) < 2:
+        i += 1
+
+    goal_position = np.array([goal.x, goal.y])
+
+    if np.linalg.norm(x - goal_position) < 0.5:
+        print("Goal reached!")
+        break
+
+
+    steps += 1
+
+if steps == max_steps:
+    print("Simulation terminated: maximum number of steps reached.")
+    
 
 trajectory = np.array(trajectory)
 
@@ -132,7 +155,7 @@ plt.plot(goal.x, goal.y, marker="x", markersize=8)
 
 plt.xlabel("X")
 plt.ylabel("Y")
-plt.title("RRT Demo")
+plt.title("RRT + MPC Tracking")
 plt.grid()
 
 plt.show()

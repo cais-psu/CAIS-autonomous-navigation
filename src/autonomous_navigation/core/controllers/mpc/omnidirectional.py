@@ -35,13 +35,17 @@ class OmniMPC(MPCController):
         if self.reference is None:
             raise ValueError("Reference is not set")
         
-        # take first reference point
-        r = np.array(self.reference[0])
+        if len(self.reference) != self.N:
+            raise ValueError(
+                f"Expected {self.N} reference points, "
+                f"received {len(self.reference)}."
+            )
 
         prog = MathematicalProgram()
 
-        # decision Variable: constant velocity over horizon
-        u = prog.NewContinuousVariables(2, "u")
+        # Decision variables:
+        # u[:, k] = control input at prediction step k
+        u = prog.NewContinuousVariables(2, self.N, "u")
 
         #dynamics rollout (linear integrator)
         x = x0.copy()
@@ -50,27 +54,36 @@ class OmniMPC(MPCController):
 
         for k in range(self.N):
             # x_{k+1} = x_k + dt*u
-            x = x+self.dt*u
+            x = self.predict(x, u[:, k])
+
+            r = np.asarray(self.reference[k])
 
             cost += (x - r).T @ self.Q @ (x - r)
 
-            cost += u.T @ self.R @ u
+            cost += u[:, k].T @ self.R @ u[:, k]
         
         prog.AddCost(cost)
 
         #constraints: velocity limits
-        prog.AddBoundingBoxConstraint(
-            -self.v_max,
-            self.v_max,
-            u
-        )
+        for k in range(self.N):
+            prog.AddBoundingBoxConstraint(
+                -self.v_max,
+                self.v_max,
+                u[:, k]
+            )
 
         result = Solve(prog)
 
         if not result.is_success():
+            print("MPC optimization failed.")
             return np.zeros(2)
         
-        return result.GetSolution(u)
+        print("Solver success:", result.is_success())
+        print("Optimal cost:", result.get_optimal_cost())
+        print("Optimal u:")
+        print(result.GetSolution(u))
+
+        return result.GetSolution(u[:, 0])
 
     def predict(self, state: np.ndarray, control: np.ndarray) -> np.ndarray:
         return state + self.dt * control

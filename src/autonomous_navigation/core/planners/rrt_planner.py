@@ -119,7 +119,7 @@ class RRTPlanner:
 
         return total
     
-    def plan(self, start: RRTNode, goal: RRTNode, max_iters: int = 1000):
+    def plan(self, start: RRTNode, goal: RRTNode, max_iters: int = 5000):
 
         self.nodes = [start]
 
