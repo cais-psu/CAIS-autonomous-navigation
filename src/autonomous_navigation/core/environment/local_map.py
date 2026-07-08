@@ -118,3 +118,36 @@ class LocalMap:
             raise TypeError(
                 f"Unsupported obstacle type: {type(obstacle).__name__}"
             )
+        
+    def get_bounds(
+            self,
+            robot_x,
+            robot_y,
+
+    ):
+        xmin = max(
+            0,
+            robot_x - self.sensing_radius
+        )
+
+        xmax = min(
+            self.global_grid.width - 1,
+            robot_x + self.sensing_radius
+        )
+
+        ymin = max(
+            0,
+            robot_y - self.sensing_radius
+        )
+
+        ymax = min(
+            self.global_grid.height - 1,
+            robot_y + self.sensing_radius
+        )
+
+        return (
+            xmin,
+            xmax,
+            ymin,
+            ymax
+        )

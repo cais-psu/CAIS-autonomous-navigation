@@ -1,5 +1,6 @@
 import math
 import random
+import numpy as np
 from autonomous_navigation.core.planners.rrt_node import RRTNode
 from autonomous_navigation.core.environment.occupancy_grid import OccupancyGrid
 
@@ -10,12 +11,16 @@ class RRTPlanner:
     def __init__(
         self,
         occupancy_grid: OccupancyGrid,
-        step_size=5
+        step_size=5,
+        sampler=None
     ):
         self.grid = occupancy_grid
         self.step_size = step_size
+        self.sampler = sampler
         
         self.nodes = []
+
+        self.sampling_bounds = None
     
     def distance(
             self,
@@ -30,15 +35,30 @@ class RRTPlanner:
     
     def sample_free(self):
         while True:
-            x = random.uniform(
-                0,
-                self.grid.width - 1
-            )
 
-            y = random.uniform(
-                0,
-                self.grid.height - 1 
-            )
+            if self.sampling_bounds is None:
+                x = random.uniform(
+                    0,
+                    self.grid.width - 1
+                )
+
+                y = random.uniform(
+                    0,
+                    self.grid.height - 1 
+                )
+            else:
+                xmin, xmax, ymin, ymax = self.sampling_bounds
+                
+                x = random.uniform(
+                    xmin,
+                    xmax
+                )
+                
+                y = random.uniform(
+                    ymin,
+                    ymax
+                )
+
             if self.grid.is_free(
                 int(x),
                 int(y)
@@ -119,9 +139,16 @@ class RRTPlanner:
 
         return total
     
-    def plan(self, start: RRTNode, goal: RRTNode, max_iters: int):
+    def plan(
+            self, 
+            start: RRTNode, 
+            goal: RRTNode, 
+            max_iters: int,
+            sampling_bounds=None
+            ):
 
         self.nodes = [start]
+        self.sampling_bounds = sampling_bounds
 
         for iteration in range(max_iters):
 
@@ -196,3 +223,46 @@ class RRTPlanner:
 
         return None, stats
     
+    def generate_candidates(
+        self,
+        num_samples=100
+    ):
+        candidates = []
+
+        while len(candidates) < num_samples:
+
+            x = random.uniform(
+                0,
+                self.grid.width - 1
+            )
+
+            y = random.uniform(
+                0,
+                self.grid.height - 1
+            )
+
+            if self.grid.is_free(
+                int(x),
+                int(y)
+            ):
+                candidates.append(
+                    [x, y]
+                )
+
+        return np.array(candidates)
+    
+    def sample(self):
+
+        if self.sampler is None:
+            return self.sample_free()
+
+        candidates = self.generate_candidates()
+
+        x, y = self.sampler.select_sample(
+            candidates
+        )
+
+        return RRTNode(
+            x,
+            y
+        )
