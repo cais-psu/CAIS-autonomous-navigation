@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from autonomous_navigation.core.environment.obstacles import RectangleObstacle
 from autonomous_navigation.core.environment.obstacles import CircleObstacle
 
@@ -69,13 +70,33 @@ class OccupancyGrid:
     ):
         self.obstacles.append(obstacle)
 
+        x_min = max(
+            math.floor(obstacle.x_min),
+            0
+        )
+
+        x_max = min(
+            math.ceil(obstacle.x_max),
+            self.width - 1
+        )
+
+        y_min = max(
+            math.floor(obstacle.y_min),
+            0
+        )
+
+        y_max = min(
+            math.ceil(obstacle.y_max),
+            self.height - 1
+        )
+
         for x in range (
-            obstacle.x_min, 
-            obstacle.x_max + 1
+            x_min, 
+            x_max + 1
             ):
             for y in range(
-                obstacle.y_min, 
-                obstacle.y_max + 1
+                y_min, 
+                y_max + 1
                 ):
                 self.set_obstacle(x,y)
 
@@ -85,14 +106,51 @@ class OccupancyGrid:
     ):
         self.obstacles.append(obstacle)
 
-        for x in range(self.width):
-            for y in range(self.height):
+        x_min = max(
+            math.floor(obstacle.center_x - obstacle.radius),
+            0
+        )
+
+        x_max = min(
+            math.ceil(obstacle.center_x + obstacle.radius),
+            self.width - 1
+        )
+
+        y_min = max(
+            math.floor(obstacle.center_y - obstacle.radius),
+            0
+        )
+
+        y_max = min(
+            math.ceil(obstacle.center_y + obstacle.radius),
+            self.height - 1
+        )
+
+        for x in range(x_min, x_max + 1):
+            for y in range(y_min, y_max + 1):
 
                 dx = x - obstacle.center_x
                 dy = y - obstacle.center_y
 
                 if dx**2 + dy**2 <= obstacle.radius**2:
-                    self.set_obstacle(x,y)
+                    self.set_obstacle(x, y)
+
+    def add_obstacle(
+      self,
+      obstacle      
+    ):
+        """Add a generic obstacle to the occupancy grid"""
+
+        if isinstance(obstacle, RectangleObstacle):
+            self.add_rectangle_obstacle(obstacle)
+        
+        elif isinstance(obstacle, CircleObstacle):
+            self.add_circle_obstacle(obstacle)
+
+        else:
+            raise TypeError(
+                f"Unsupported obstacle type: {type(obstacle).__name__}"
+            )
 
     def line_is_free(
             self,
@@ -116,3 +174,23 @@ class OccupancyGrid:
 
         return True
         
+    def create_configuration_space(
+        self,
+        inflation_radius: float,
+    ) -> "OccupancyGrid":
+        """
+        Create a new occupancy grid in configuration space by inflating
+        every obstacle.
+        """
+
+        cspace = OccupancyGrid(
+            width=self.width,
+            height=self.height,
+        )
+
+        for obstacle in self.obstacles:
+            cspace.add_obstacle(
+                obstacle.inflate(inflation_radius)
+            )
+
+        return cspace

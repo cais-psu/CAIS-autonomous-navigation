@@ -42,7 +42,14 @@ for _ in range(0,10):
     )
     grid.add_rectangle_obstacle(rectangle)
 
-planner = RRTPlanner(grid, 2)
+robot_radius = 2; safety_margin = 1
+inflation_radius = robot_radius + safety_margin
+
+cspace = grid.create_configuration_space(
+    inflation_radius
+)
+
+planner = RRTPlanner(cspace, 2)
 start = RRTNode(0, 0)
 goal = RRTNode(90, 90)
 
