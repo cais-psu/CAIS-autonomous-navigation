@@ -55,15 +55,13 @@ goal = RRTNode(90, 90)
 
 path, stats = planner.plan(start, goal, 5000)
 
-path = interpolate_path(path, spacing=0.5)
-
-
 if path is None:
     print("No path found")
     exit()
 else:
     print(f"Path found with {len(path)} waypoints")
 
+path = interpolate_path(path, spacing=0.5)
 
 mpc = OmniMPC(
     dt = 0.1,
@@ -138,7 +136,10 @@ ax.imshow(
 )
 
 for obstacle in grid.obstacles:
-    obstacle.plot(ax)
+    obstacle.plot(ax, edgecolor="black", linewidth=2)
+
+for obstacle in cspace.obstacles:
+    obstacle.plot(ax, edgecolor="red", linewidth=2)
 
 # Draw RRT tree
 for node in planner.nodes:
