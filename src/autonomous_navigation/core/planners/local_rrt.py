@@ -104,14 +104,14 @@ class LocalRRTPlanner:
         )
 
 
-        planner = RRTPlanner(
+        self.rrt = RRTPlanner(
             local_grid,
             step_size=self.step_size,
             sampler=self.sampler,
         )
 
 
-        return planner.plan(
+        return self.rrt.plan(
             start,
             goal,
             max_iters,

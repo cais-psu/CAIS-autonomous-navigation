@@ -5,6 +5,7 @@ matplotlib.use("TkAgg")
 
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from matplotlib.patches import Circle
 
 from autonomous_navigation.core.environment.occupancy_grid import OccupancyGrid
@@ -14,6 +15,7 @@ from autonomous_navigation.core.planners.rrt_node import RRTNode
 from autonomous_navigation.core.planners.rrt_planner import RRTPlanner
 from autonomous_navigation.core.controllers.mpc.omnidirectional import OmniMPC
 from autonomous_navigation.core.planners.path_utils import interpolate_path
+from autonomous_navigation.core.planners.local_rrt import LocalRRTPlanner
 
 
 grid = OccupancyGrid(
@@ -49,9 +51,20 @@ cspace = grid.create_configuration_space(
     inflation_radius
 )
 
-planner = RRTPlanner(cspace, 2)
-start = RRTNode(0, 0)
-goal = RRTNode(90, 90)
+planner = LocalRRTPlanner(
+    global_map=cspace,
+    sensing_radius=20,
+    step_size=2,
+)
+start = RRTNode(20, 20)
+goal = RRTNode(35, 30)
+
+local_grid, bounds = planner.get_local_map(
+    start.x,
+    start.y
+)
+
+xmin, xmax, ymin, ymax = bounds
 
 path, stats = planner.plan(start, goal, 5000)
 
@@ -62,6 +75,10 @@ else:
     print(f"Path found with {len(path)} waypoints")
 
 path = interpolate_path(path, spacing=0.5)
+
+rrt = planner.rrt
+
+
 
 mpc = OmniMPC(
     dt = 0.1,
@@ -138,19 +155,20 @@ ax.imshow(
 for obstacle in grid.obstacles:
     obstacle.plot(ax, edgecolor="black", linewidth=2)
 
-for obstacle in cspace.obstacles:
-    obstacle.plot(ax, edgecolor="red", linewidth=2)
+for obstacle in local_grid.obstacles:
+    obstacle.plot(ax, edgecolor="green", linewidth=2)
 
 # Draw RRT tree
-for node in planner.nodes:
+for node in rrt.nodes:
 
     if node.parent is not None:
 
-        parent = planner.nodes[node.parent]
+        parent = rrt.nodes[node.parent]
 
         ax.plot(
             [parent.x, node.x],
             [parent.y, node.y],
+            color = 'green',
             linewidth=0.5
         )
 
@@ -206,6 +224,25 @@ robot = Circle(
 
 ax.add_patch(robot)
 
+sensing_radius = Circle(
+    (start.x, start.y),
+    planner.sensing_radius,
+    fill=False,
+    linestyle="--",
+    linewidth=2,
+)
+ax.add_patch(sensing_radius)
+
+window = patches.Rectangle(
+    (xmin, ymin),
+    xmax - xmin,
+    ymax - ymin,
+    fill=False,
+    linestyle=":",
+    linewidth=2,
+)
+
+ax.add_patch(window)
 
 ax.set_xlabel("X")
 ax.set_ylabel("Y")
@@ -221,8 +258,23 @@ def update(frame):
         trajectory[frame,0],
         trajectory[frame,1]
     )
+    sensing_radius.center = (
+        trajectory[frame,0],
+        trajectory[frame,1],
+    )
 
-    return robot,
+    xmin = max(0, trajectory[frame, 0] - planner.sensing_radius)
+    xmax = min(cspace.width - 1, trajectory[frame, 0] + planner.sensing_radius)
+
+    ymin = max(0, trajectory[frame, 1] - planner.sensing_radius)
+    ymax = min(cspace.height - 1, trajectory[frame, 1] + planner.sensing_radius)
+
+    window.set_xy((xmin, ymin))
+    window.set_width(xmax - xmin)
+    window.set_height(ymax - ymin)
+
+
+    return robot, sensing_radius, window
 
 
 animation = FuncAnimation(
