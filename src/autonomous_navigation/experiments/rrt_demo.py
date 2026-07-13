@@ -41,7 +41,7 @@ planner = RRTPlanner(grid, 5)
 start = RRTNode(0, 0)
 goal = RRTNode(90, 90)
 
-path, stats = planner.plan(start, goal)
+path, stats = planner.plan(start, goal, 5000)
 
 if path is None:
     print("No path found")
