@@ -101,7 +101,9 @@ class HeatMap:
 
         This represents the robot leaving behind heat.
         """
-
+        x = int(round(x))
+        y = int(round(y))
+        
         if not self._in_bounds(x, y):
             return
 
