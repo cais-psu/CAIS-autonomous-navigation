@@ -8,6 +8,7 @@ from autonomous_navigation.core.exploration.exploration_manager import (
 from autonomous_navigation.core.exploration.exploration_result import (
     ExplorationResult,
 )
+from autonomous_navigation.core.planners.rrt_node import RRTNode
 
 
 def test_exploration_manager_returns_result():
@@ -177,3 +178,58 @@ def test_stats_dictionary_contains_success():
     )
 
     assert "success" in result.stats
+
+def test_goal_mode_does_not_change_heat():
+
+    grid = OccupancyGrid(
+        width=40,
+        height=40,
+    )
+
+    heat = HeatMap(
+        width=40,
+        height=40,
+    )
+
+    manager = ExplorationManager(
+        occupancy_grid=grid,
+        heat_map=heat,
+        sensing_radius=15,
+    )
+
+    before = heat.temperature.copy()
+
+    manager.plan(
+        robot_position=np.array([10.0,10.0]),
+        mission_goal=RRTNode(30,30),
+    )
+
+    assert np.array_equal(
+        before,
+        heat.temperature,
+    )
+
+def test_goal_mode_selected():
+
+    grid = OccupancyGrid(
+        width=40,
+        height=40,
+    )
+
+    heat = HeatMap(
+        width=40,
+        height=40,
+    )
+
+    manager = ExplorationManager(
+        occupancy_grid=grid,
+        heat_map=heat,
+        sensing_radius=15,
+    )
+
+    result = manager.plan(
+        robot_position=np.array([10.0,10.0]),
+        mission_goal=RRTNode(30,30),
+    )
+
+    assert result.stats["mode"] == "goal"

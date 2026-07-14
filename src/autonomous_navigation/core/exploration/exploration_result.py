@@ -10,6 +10,6 @@ class ExplorationResult:
     path: list
     target: RRTNode
     stats: dict
-
     local_grid: OccupancyGrid
     rrt: RRTPlanner
+    bounds: tuple
