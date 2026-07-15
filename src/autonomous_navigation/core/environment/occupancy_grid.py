@@ -1,8 +1,9 @@
 import numpy as np
+import random
 import math
 from autonomous_navigation.core.environment.obstacles import RectangleObstacle
 from autonomous_navigation.core.environment.obstacles import CircleObstacle
-
+from autonomous_navigation.core.environment.environment_generator import EnvironmentGenerator
 
 class OccupancyGrid:
     def __init__(self, width: int, height: int):
@@ -179,11 +180,11 @@ class OccupancyGrid:
         inflation_radius: float,
     ) -> "OccupancyGrid":
         """
-        Create a new occupancy grid in configuration space by inflating
+        Create a configuration-space occupancy grid by inflating
         every obstacle.
         """
 
-        cspace = OccupancyGrid(
+        cspace = type(self)(
             width=self.width,
             height=self.height,
         )
@@ -194,3 +195,79 @@ class OccupancyGrid:
             )
 
         return cspace
+    
+    @classmethod
+    def random_environment(
+        cls,
+        width: int,
+        height: int,
+        n_circles: int = 10,
+        n_rectangles: int = 10,
+        circle_radius_range: tuple[int, int] = (4, 12),
+        rectangle_size_range: tuple[int, int] = (1, 15),
+        seed: int | None = None,
+    ) -> "OccupancyGrid":
+        """
+        Create an occupancy grid populated with random obstacles.
+
+        Parameters
+        ----------
+        width : int
+            Grid width.
+
+        height : int
+            Grid height.
+
+        n_circles : int
+            Number of circular obstacles.
+
+        n_rectangles : int
+            Number of rectangular obstacles.
+
+        circle_radius_range : (min_radius, max_radius)
+
+        rectangle_size_range : (min_size, max_size)
+
+        seed : int | None
+            Optional random seed for reproducibility.
+
+        Returns
+        -------
+        OccupancyGrid
+            Randomly populated occupancy grid.
+        """
+
+        if seed is not None:
+            random.seed(seed)
+            np.random.seed(seed)
+
+        grid = cls(
+            width=width,
+            height=height,
+        )
+
+        generator = EnvironmentGenerator()
+
+        for _ in range(n_circles):
+
+            obstacle = generator.random_circle(
+                width=width,
+                height=height,
+                min_radius=circle_radius_range[0],
+                max_radius=circle_radius_range[1],
+            )
+
+            grid.add_circle_obstacle(obstacle)
+
+        for _ in range(n_rectangles):
+
+            obstacle = generator.random_rectangle(
+                width=width,
+                height=height,
+                min_size=rectangle_size_range[0],
+                max_size=rectangle_size_range[1],
+            )
+
+            grid.add_rectangle_obstacle(obstacle)
+
+        return grid

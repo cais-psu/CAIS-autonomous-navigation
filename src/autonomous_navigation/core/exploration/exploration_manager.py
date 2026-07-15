@@ -11,6 +11,7 @@ from autonomous_navigation.core.planners.rrt_node import RRTNode
 from autonomous_navigation.core.exploration.exploration_result import (
     ExplorationResult,
 )
+from autonomous_navigation.core.planners.corridor_generator import CorridorGenerator
 
 
 class ExplorationManager:
@@ -30,6 +31,8 @@ class ExplorationManager:
         Local RRT
             ↓
         Path Interpolation
+            ↓
+        Convex Corridor Generation
             ↓
         MPC Reference
 
@@ -64,6 +67,8 @@ class ExplorationManager:
         self.target_selector = LocalTargetSelector(
             sensing_radius=sensing_radius
         )
+
+        self.corridor_generator = None
 
         self.local_rrt = LocalRRTPlanner(
             global_map=occupancy_grid,
@@ -107,6 +112,9 @@ class ExplorationManager:
             robot_y,
         )
 
+        corridor_generator = CorridorGenerator(
+            local_grid,
+        )
 
         #
         # Select target
@@ -184,6 +192,7 @@ class ExplorationManager:
 
             result = ExplorationResult(
                 path=None,
+                corridors=None,
                 target=target,
                 stats=stats,
                 local_grid=local_grid,
@@ -204,11 +213,15 @@ class ExplorationManager:
             spacing=self.interpolation_spacing,
         )
 
+        corridors = corridor_generator.generate(
+            path
+        )
 
-        stats["success"] = True
+        stats["num_corridors"] = len(corridors)
 
         result = ExplorationResult(
             path=path,
+            corridors=corridors,
             target=target,
             stats=stats,
             local_grid=local_grid,
@@ -218,4 +231,8 @@ class ExplorationManager:
 
         self.last_result = result
 
+        stats["success"] = True
+
         return result
+
+

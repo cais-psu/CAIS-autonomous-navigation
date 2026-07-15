@@ -7,7 +7,8 @@ from autonomous_navigation.core.planners.rrt_node import RRTNode
 
 @dataclass
 class ExplorationResult:
-    path: list
+    path: list | None
+    corridors: list | None
     target: RRTNode
     stats: dict
     local_grid: OccupancyGrid
