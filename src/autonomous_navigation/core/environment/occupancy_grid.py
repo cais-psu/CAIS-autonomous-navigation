@@ -23,6 +23,9 @@ class OccupancyGrid:
 
         self.obstacles = []
 
+        self.origin_x = 0
+        self.origin_y = 0
+
     def in_bounds(self, x: int, y: int) -> bool:
         return (
             0 <= x < self.width
@@ -55,6 +58,34 @@ class OccupancyGrid:
             )
 
         return self.grid[y, x] == 1
+    
+    def is_occupied_continuous(
+        self,
+        x: float,
+        y: float,
+    ) -> bool:
+        """
+        Continuous coordinate occupancy query.
+
+        Conservative:
+        Any nearby occupied grid cell makes the point occupied.
+        """
+
+        x0 = int(math.floor(x))
+        y0 = int(math.floor(y))
+
+        for dx in [0, 1]:
+            for dy in [0, 1]:
+
+                xi = x0 + dx
+                yi = y0 + dy
+
+                if self.in_bounds(xi, yi):
+
+                    if self.grid[yi, xi] == 1:
+                        return True
+
+        return False
 
     def is_free(self, x: int, y: int) -> bool:
 

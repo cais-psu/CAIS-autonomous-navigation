@@ -25,7 +25,7 @@ grid = OccupancyGrid.random_environment(
     seed=1,
 )
 
-robot_radius = 2
+robot_radius = 1
 safety_margin = 1
 
 inflation_radius = robot_radius + safety_margin
@@ -59,8 +59,8 @@ start = np.array(
 )
 
 goal = RRTNode(
-    40,
-    40,
+    60,
+    80,
 )
 
 x = start.copy()

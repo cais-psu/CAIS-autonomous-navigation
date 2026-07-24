@@ -78,10 +78,10 @@ class OmniMPC(MPCController):
             print("MPC optimization failed.")
             return np.zeros(2)
         
-        print("Solver success:", result.is_success())
-        print("Optimal cost:", result.get_optimal_cost())
-        print("Optimal u:")
-        print(result.GetSolution(u))
+        #print("Solver success:", result.is_success())
+        #print("Optimal cost:", result.get_optimal_cost())
+        #print("Optimal u:")
+        #print(result.GetSolution(u))
 
         return result.GetSolution(u[:, 0])
 

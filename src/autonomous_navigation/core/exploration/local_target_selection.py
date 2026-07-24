@@ -89,6 +89,14 @@ class LocalTargetSelector:
 
                 if occupancy_grid.is_occupied(x, y):
                     continue
+                # reject cells too close to obstacles
+                if not occupancy_grid.line_is_free(
+                    int(robot_x),
+                    int(robot_y),
+                    x,
+                    y,
+                ):
+                    continue
 
                 distance = math.hypot(x - robot_x, y - robot_y)
 
@@ -113,4 +121,30 @@ class LocalTargetSelector:
                 "No reachable free cell found within sensing radius."
             )
 
+        print(
+            "Target validation:",
+            best_cell,
+            "occupied:",
+            occupancy_grid.is_occupied(
+                best_cell[0],
+                best_cell[1]
+            )
+        )
+
+        print(
+            "Neighborhood:"
+        )
+
+        for dx in [-1,0,1]:
+            for dy in [-1,0,1]:
+
+                xx = best_cell[0] + dx
+                yy = best_cell[1] + dy
+
+                if occupancy_grid.in_bounds(xx,yy):
+
+                    print(
+                        (xx,yy),
+                        occupancy_grid.is_occupied(xx,yy)
+                    )
         return RRTNode(best_cell[0], best_cell[1])
