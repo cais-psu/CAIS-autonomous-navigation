@@ -10,6 +10,7 @@ class RobotState:
     y: float
     theta: float
 
+    v: float = 0.0
     vx: float = 0.0
     vy: float = 0.0
     omega: float = 0.0
