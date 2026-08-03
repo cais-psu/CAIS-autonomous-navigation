@@ -24,7 +24,9 @@ class CorridorGenerator:
                 path[i],
                 path[i+1],
             )
-
+            if corridor is None:
+                continue
+            
             if not self.is_valid(corridor):
 
                 print(
@@ -107,7 +109,6 @@ class CorridorGenerator:
         Create rectangular corridor around path segment.
         Equivalent to MATLAB path_to_corridor_simple().
         """
-
         p1 = np.asarray(p1)
         p2 = np.asarray(p2)
 
@@ -177,6 +178,7 @@ class CorridorGenerator:
                 ]
             )
 
+            normal = normal / np.linalg.norm(normal)
 
             # ensure normal points outward
 
@@ -192,7 +194,11 @@ class CorridorGenerator:
         return ConvexCorridor(
             np.array(A),
             np.array(b),
+            vertices=vertices,
+            center=center,
         )
+
+
     
     @staticmethod
     def corridor_to_polygon(corridor):

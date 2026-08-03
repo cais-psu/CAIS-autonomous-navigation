@@ -14,10 +14,22 @@ class ConvexCorridor:
         self,
         A: np.ndarray,
         b: np.ndarray,
+        vertices: np.ndarray | None=None,
+        center: np.ndarray | None = None,
     ):
 
-        self.A = np.asarray(A)
-        self.b = np.asarray(b)
+        self.A = np.asarray(A, dtype=float)
+        self.b = np.asarray(b, dtype=float)
+        self.vertices = (
+            np.asarray(vertices, dtype=float)
+            if vertices is not None
+            else None
+        )
+        self.center = (
+            np.asarray(center, dtype = float)
+            if center is not None
+            else None
+        )
 
 
     def contains(
@@ -27,6 +39,9 @@ class ConvexCorridor:
     ) -> bool:
 
         point = np.asarray(point)
+
+        if point.shape[0] > 2:
+            point = point[:2]
 
         return np.all(
             self.A @ point <= self.b + tolerance
@@ -38,20 +53,26 @@ class ConvexCorridor:
         return self.A.shape[0]
 
 
-    def get_vertices(self):
-        """
-        Return polygon vertices for visualization.
-
-        For 2D rectangular corridors initially.
-        """
-
-        pass
-
     def get_bounds(self):
 
-        xmin = -self.b[1]
-        xmax = self.b[0]
-        ymin = -self.b[3]
-        ymax = self.b[2]
+        if self.vertices is None:
+            raise ValueError("Vertices unavailable.")
 
-        return xmin,xmax,ymin,ymax
+        xmin = np.min(self.vertices[:,0])
+        xmax = np.max(self.vertices[:,0])
+        ymin = np.min(self.vertices[:,1])
+        ymax = np.max(self.vertices[:,1])
+
+        return xmin, xmax, ymin, ymax
+
+    def get_vertices(self):
+        return self.vertices
+
+    @property
+    def dimension(self):
+
+        return self.A.shape[1]
+
+    def halfspace(self):
+
+        return self.A, self.b
