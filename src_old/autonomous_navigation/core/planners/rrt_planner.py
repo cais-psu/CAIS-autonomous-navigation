@@ -152,7 +152,7 @@ class RRTPlanner:
 
         for iteration in range(max_iters):
 
-            sample = self.sample_free()
+            sample = self.sample()
 
             nearest_idx = self.nearest_node(sample, self.nodes)
             nearest = self.nodes[nearest_idx]
@@ -229,16 +229,25 @@ class RRTPlanner:
     ):
         candidates = []
 
+        if self.sampling_bounds is None:
+            xmin = 0
+            xmax = self.grid.width - 1
+            ymin = 0
+            ymax = self.grid.height - 1
+
+        else:
+            xmin, xmax, ymin, ymax = self.sampling_bounds
+
         while len(candidates) < num_samples:
 
             x = random.uniform(
-                0,
-                self.grid.width - 1
+                xmin,
+                xmax
             )
 
             y = random.uniform(
-                0,
-                self.grid.height - 1
+                ymin,
+                ymax
             )
 
             if self.grid.is_free(
@@ -254,6 +263,7 @@ class RRTPlanner:
     def sample(self):
 
         if self.sampler is None:
+
             return self.sample_free()
 
         candidates = self.generate_candidates()
@@ -266,3 +276,51 @@ class RRTPlanner:
             x,
             y
         )
+
+    def build_tree(
+        self,
+        start: RRTNode,
+        max_iters: int,
+        sampling_bounds=None,
+    ):
+        self.nodes = [start]
+        self.sampling_bounds = sampling_bounds
+
+        for iteration in range(max_iters):
+
+            sample = self.sample()
+
+            nearest_idx = self.nearest_node(
+                sample,
+                self.nodes,
+            )
+
+            nearest = self.nodes[nearest_idx]
+
+            new_node = self.steer(
+                nearest,
+                sample,
+            )
+
+            if not self.grid.in_bounds(
+                int(new_node.x),
+                int(new_node.y),
+            ):
+                continue
+
+            if self.grid.line_is_free(
+                int(nearest.x),
+                int(nearest.y),
+                int(new_node.x),
+                int(new_node.y),
+            ):
+                new_node.parent = nearest_idx
+                self.nodes.append(new_node)
+
+        stats = {
+            "success": True,
+            "iterations": max_iters,
+            "nodes": len(self.nodes),
+        }
+
+        return self, stats

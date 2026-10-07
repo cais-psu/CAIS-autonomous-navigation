@@ -16,6 +16,7 @@ from autonomous_navigation.core.controllers.mpc.omnidirectional import OmniMPC
 from autonomous_navigation.core.exploration.heat_map import HeatMap
 from autonomous_navigation.core.exploration.exploration_manager import ExplorationManager
 from autonomous_navigation.core.planners.corridor_generator import CorridorGenerator
+from autonomous_navigation.core.exploration.hedac_sampler import HEDACSampler
 
 
 grid = OccupancyGrid.random_environment(
@@ -54,12 +55,21 @@ heat = HeatMap(
     height=100,
 )
 
+hedac_sampler = HEDACSampler(
+    heat_map=heat,
+    gamma=10.0,
+)
+
 manager = ExplorationManager(
     occupancy_grid=cspace,
     heat_map=heat,
     sensing_radius=20,
     planner_step_size=2,
+    sampler=hedac_sampler,
 )
+
+print("Manager sampler:")
+print(manager.local_rrt.sampler)
 
 mpc = OmniMPC(
     dt=0.1,

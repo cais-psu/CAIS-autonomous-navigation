@@ -109,6 +109,6 @@ class HEDACSampler:
 
 
         return (
-            int(selected[0]),
-            int(selected[1]),
+            float(selected[0]),
+            float(selected[1]),
         )

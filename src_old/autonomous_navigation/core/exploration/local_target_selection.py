@@ -6,6 +6,7 @@ import numpy as np
 from autonomous_navigation.core.exploration.heat_map import HeatMap
 from autonomous_navigation.core.environment.occupancy_grid import OccupancyGrid
 from autonomous_navigation.core.planners.rrt_node import RRTNode
+from autonomous_navigation.core.exploration.hedac_sampler import HEDACSampler
 
 
 class LocalTargetSelector:
@@ -147,4 +148,72 @@ class LocalTargetSelector:
                         (xx,yy),
                         occupancy_grid.is_occupied(xx,yy)
                     )
+
         return RRTNode(best_cell[0], best_cell[1])
+
+    def select_exploration_node(
+        self,
+        robot_x,
+        robot_y,
+        heat_map,
+        rrt,
+        planner_step_size,
+    ):
+
+        best_temperature = float("inf")
+        best_distance = -float("inf")
+        best_node = None
+        best_index = None
+
+        nodes = rrt.nodes
+
+        robot = RRTNode(
+            robot_x,
+            robot_y
+        )
+
+
+        for i, node in enumerate(nodes[1:], start=1):
+
+            distance = self.distance(
+                robot,
+                node
+            )
+
+            if distance < 2 * planner_step_size:
+                continue
+
+
+            temperature = heat_map.get_temperature(
+                int(node.x),
+                int(node.y)
+            )
+
+            if (
+                temperature < best_temperature
+                or (
+                    abs(temperature - best_temperature) < 1e-6
+                    and distance > best_distance
+                )
+            ):
+                best_temperature = temperature
+                best_distance = distance
+                best_node = node
+                best_index = i
+
+
+        if best_node is None:
+            raise RuntimeError(
+                "No valid exploration node found"
+            )
+
+
+        return best_index, best_node
+    
+    def distance(self, node1, node2):
+        return math.hypot(
+            node1.x - node2.x,
+            node1.y - node2.y,
+        )
+
+

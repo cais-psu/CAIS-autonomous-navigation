@@ -117,3 +117,44 @@ class LocalRRTPlanner:
             max_iters,
             sampling_bounds=bounds
         )
+
+    def build_tree(
+        self,
+        start: RRTNode,
+        max_iters: int = 5000,
+    ):
+        """
+        Build a local RRT without a predefined goal.
+
+        Parameters
+        ----------
+        start : RRTNode
+            Robot position.
+
+        max_iters : int
+            Number of RRT expansion iterations.
+
+        Returns
+        -------
+        nodes, stats
+            The constructed RRT tree and associated statistics.
+        """
+
+        local_grid, bounds = self.get_local_map(
+            start.x,
+            start.y,
+        )
+
+        self.rrt = RRTPlanner(
+            local_grid,
+            step_size=self.step_size,
+            sampler=self.sampler,
+        )
+
+        return self.rrt.build_tree(
+            start,
+            max_iters,
+            sampling_bounds=bounds,
+        )
+
+        

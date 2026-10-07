@@ -12,7 +12,7 @@ from autonomous_navigation.core.exploration.exploration_result import (
     ExplorationResult,
 )
 from autonomous_navigation.core.planners.corridor_generator import CorridorGenerator
-
+from autonomous_navigation.core.exploration.hedac_sampler import HEDACSampler
 
 class ExplorationManager:
     """
@@ -389,8 +389,6 @@ class ExplorationManager:
         self,
         robot_position,
     ):
-
-        self.current_target = self.select_local_target(robot_position)
 
         result = self.plan_local_mission(
             robot_position,
