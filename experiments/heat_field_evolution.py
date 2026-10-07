@@ -13,10 +13,6 @@ from autonomous_navigation.core.exploration.heat_map import HeatMap
 from autonomous_navigation.core.exploration.hedac_sampler import HEDACSampler
 
 
-# ============================================================
-# Parameters
-# ============================================================
-
 WIDTH = 100
 HEIGHT = 100
 
@@ -31,11 +27,6 @@ NUM_STEPS = 250
 ROBOT_RADIUS = 1.0
 SAFETY_MARGIN = 1.0
 
-
-# ============================================================
-# Environment
-# ============================================================
-
 grid = OccupancyGrid.random_environment(
     width=WIDTH,
     height=HEIGHT,
@@ -48,11 +39,6 @@ cspace = grid.create_configuration_space(
     ROBOT_RADIUS + SAFETY_MARGIN
 )
 
-
-# ============================================================
-# Heat field
-# ============================================================
-
 heat = HeatMap(
     width=WIDTH,
     height=HEIGHT,
@@ -64,10 +50,6 @@ hedac_sampler = HEDACSampler(
 )
 
 
-# ============================================================
-# Robot
-# ============================================================
-
 robot = RRTNode(
     10.0,
     10.0,
@@ -78,9 +60,6 @@ trajectory = [
 ]
 
 
-# ============================================================
-# Simulation
-# ============================================================
 
 for step in range(NUM_STEPS):
 
@@ -96,15 +75,7 @@ for step in range(NUM_STEPS):
         amount=1.0,
     )
 
-    # --------------------------------------------------------
-    # 2. Diffuse / cool heat
-    # --------------------------------------------------------
-
     heat.step()
-
-    # --------------------------------------------------------
-    # 3. Generate local perceived map
-    # --------------------------------------------------------
 
     local_map = LocalMap(
         global_grid=cspace,
@@ -121,10 +92,6 @@ for step in range(NUM_STEPS):
         robot.y,
     )
 
-    # --------------------------------------------------------
-    # 4. Build a one-step HEDAC-biased RRT
-    # --------------------------------------------------------
-
     rrt = RRTPlanner(
         occupancy_grid=local_grid,
         step_size=RRT_STEP_SIZE,
@@ -137,19 +104,11 @@ for step in range(NUM_STEPS):
         sampling_bounds=bounds,
     )
 
-    # --------------------------------------------------------
-    # 5. Execute the newly generated RRT node
-    # --------------------------------------------------------
-
     if len(rrt.nodes) <= 1:
         print("No valid RRT extension.")
         continue
 
     new_node = rrt.nodes[-1]
-
-    # --------------------------------------------------------
-    # 6. Move robot
-    # --------------------------------------------------------
 
     robot = RRTNode(
         new_node.x,
@@ -163,11 +122,6 @@ for step in range(NUM_STEPS):
     print(
         f"Robot: ({robot.x:.2f}, {robot.y:.2f})"
     )
-
-
-# ============================================================
-# Visualization
-# ============================================================
 
 fig, ax = plt.subplots(
     figsize=(10, 10)
